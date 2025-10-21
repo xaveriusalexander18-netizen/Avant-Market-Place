@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Manajemen Seafood</title>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+        
+        :root {
+            --primary-color: #3498db;
+            --success-color: #2ecc71;
+            --light-bg: #f4f7f6;
+            --white-bg: #ffffff;
+            --dark-text: #2c3e50;
+            --light-text: #333;
+            --border-color: #e0e0e0;
+        }
+
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background-color: var(--light-bg); 
+            color: var(--light-text); 
+            margin: 0; 
+            padding: 20px; 
+        }
+        header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 30px; 
+            padding-bottom: 20px; 
+            border-bottom: 2px solid var(--border-color); 
+        }
+        header h1 { color: var(--dark-text); margin: 0; }
+        
+        .delivery-section {
+            background-color: var(--white-bg); 
+            padding: 25px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+        
+        .delivery-section input[type="date"] {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 250px;
+        }
+
+        main { 
+            display: grid; 
+            grid-template-columns: 2fr 1fr;
+            gap: 30px; 
+        }
+        
+        .stock-section {
+            grid-column: 1 / -1;
+        }
+
+        section { 
+            background-color: var(--white-bg); 
+            padding: 25px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); 
+        }
+        h2 { 
+            color: var(--dark-text); 
+            margin-top: 0; 
+            border-bottom: 1px solid #eee; 
+            padding-bottom: 10px; 
+            margin-bottom: 20px; 
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+        }
+        th, td { 
+            padding: 12px 15px; 
+            text-align: left; 
+            border-bottom: 1px solid #ddd; 
+            vertical-align: middle;
+        }
+        thead th { 
+            background-color: var(--primary-color); 
+            color: white; 
+            font-weight: 600; 
+        }
+        tbody tr:nth-child(even) { 
+            background-color: #f9f9f9; 
+        }
+
+        /* --- STYLING TOMBOL & KERANJANG --- */
+
+        .btn {
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            color: white;
+            font-size: 0.9rem;
+        }
+        .add-btn {
+            background-color: var(--primary-color);
+        }
+        .add-btn:hover {
+            background-color: #2980b9;
+        }
+        .add-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        /* TOMBOL CHECKOUT BARU */
+        .checkout-btn {
+            background-color: var(--success-color);
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1rem;
+            margin-top: 15px;
+        }
+        .checkout-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .qty-btn {
+            background-color: #ecf0f1;
+            border: 1px solid #bdc3c7;
+            color: var(--dark-text);
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
+            text-align: center;
+        }
+        
+        #cart-table td:nth-child(2) { white-space: nowrap; }
+        
+        .cart-summary {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid #eee;
+        }
+        .cart-summary p {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 0.95rem;
+        }
+        .cart-summary h3 {
+            display: flex;
+            justify-content: space-between;
+            color: var(--dark-text);
+            margin-top: 10px;
+        }
+        
+        .moq-note {
+            display: block;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            font-style: italic;
+            text-align: center;
+        }
+        
+        .empty-cart-message {
+            text-align: center;
+            color: #95a5a6;
+            padding: 20px 0;
+        }
+        
+        /* --- AKHIR STYLING BARU --- */
+
+        td .category-frozen { background-color: #eaf2f8; color: #3498db; padding: 5px 10px; border-radius: 15px; font-size: 0.9em; }
+        td .category-live { background-color: #e8f6f3; color: #1abc9c; padding: 5px 10px; border-radius: 15px; font-size: 0.9em; }
+        td .category-shiok { background-color: #fef5e7; color: #f39c12; padding: 5px 10px; border-radius: 15px; font-size: 0.9em; }
+        
+        .language-switcher button { background-color: #ecf0f1; border: 1px solid #bdc3c7; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-left: 5px; transition: background-color 0.3s; }
+        .language-switcher button:hover { background-color: #dadedf; }
+        .language-switcher button.active { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
+        
+        @media (max-width: 900px) { 
+            main { grid-template-columns: 1fr; } 
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 data-lang="appTitle">Sistem Manajemen Seafood</h1>
+        <div class="language-switcher">
+            <button id="lang-id" class="active">ID</button>
+            <button id="lang-en">EN</button>
+        </div>
+    </header>
+
+    <section class="delivery-section">
+        <h2 data-lang="deliveryTitle">🚚 Tanggal Pengiriman</h2>
+        <input type="date" id="delivery-date-picker">
+    </section>
+
+    <main>
+        <section>
+            <h2 data-lang="priceListTitle">💰 Daftar Harga</h2>
+            <table id="price-table">
+                <thead>
+                    <tr>
+                        <th data-lang="product">Produk</th>
+                        <th data-lang="category">Kategori</th>
+                        <th data-lang="finalPrice">Harga</th>
+                        <th data-lang="stock">Stok</th>
+                        <th data-lang="order">Pesan</th>
+                    </tr>
+                </thead>
+                <tbody id="price-list-body"></tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2 data-lang="cartTitle">🛒 Keranjang Belanja</h2>
+            <table id="cart-table">
+                <thead>
+                    <tr>
+                        <th data-lang="item">Item</th>
+                        <th data-lang="quantity">Jumlah</th>
+                        <th data-lang="total">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="cart-body"></tbody>
+            </table>
+            
+            <div id="cart-summary-container">
+                </div>
+        </section>
+
+        <section class="stock-section">
+            <h2 data-lang="stockListTitle">📦 Daftar Stok</h2>
+            <table id="stock-table">
+                <thead>
+                    <tr>
+                        <th data-lang="product">Produk</th>
+                        <th data-lang="stock">Stok Tersisa</th>
+                    </tr>
+                </thead>
+                <tbody id="stock-list-body"></tbody>
+            </table>
+        </section>
+    </main>
+
+    <script>
+        // ======================================================
+        // PUSAT DATA - "ADMIN" MENGEDIT DATA DI SINI
+        // ======================================================
+        
+        const products = [
+            // --- (FROZEN) ---
+            { id: "F001", name: "Angka Prawn Meat 200g", category: "Frozen", basePrice: 7.50, stock: 120 },
+            { id: "F002", name: "Cooked Angka Prawn 200g", category: "Frozen", basePrice: 8.50, stock: 90 },
+            { id: "F003", name: "Japanese Scallop 1kg", category: "Frozen", basePrice: 35.00, stock: 50 },
+            { id: "F004", name: "Japanese Scallop 200g", category: "Frozen", basePrice: 9.00, stock: 0 },
+            { id: "F005", name: "Unagi Kabayaki 200g", category: "Frozen", basePrice: 15.00, stock: 40 },
+            { id: "F006", name: "Salmon Portion 200g", category: "Frozen", basePrice: 12.00, stock: 5 },
+            // --- (LIVE) ---
+            { id: "L001", name: "Coffin Bay Oyster", category: "Live", basePrice: 4.50, stock: 999 },
+            { id: "L002", name: "Live Mud Crab", category: "Live", basePrice: 28.00, stock: 999 },
+            { id: "L003", name: "Live Lobster", category: "Live", basePrice: 15.00, stock: 999 },
+            // --- (SHIOK) ---
+            { id: "S001", name: "SHIOK Oyster", category: "Shiok", basePrice: 6.50, stock: 30 },
+            { id: "S002", name: "SHIOK Grilled Prawn", category: "Shiok", basePrice: 9.50, stock: 45 },
+            { id: "S003", name: "SHIOK Calamari Rings", category: "Shiok", basePrice: 5.50, stock: 50 },
+        ];
+
+        // ======================================================
+        // LOGIKA APLIKASI
+        // ======================================================
+        
+        let cart = []; 
+        const GST_RATE = 0.09; 
+        const MOQ_TARGET = 180; 
+
+        const translations = {
+            en: { 
+                appTitle: "Seafood Management System", 
+                deliveryTitle: "🚚 Delivery Date", 
+                priceListTitle: "💰 Price List", 
+                stockListTitle: "📦 Stock List", 
+                product: "Product", 
+                category: "Category", 
+                finalPrice: "Price", 
+                stock: "Stock", 
+                frozen: "Frozen", 
+                live: "Live", 
+                shiok: "Ready to Eat",
+                order: "Order",
+                add: "Add",
+                outOfStock: "Sold Out",
+                cartTitle: "🛒 Shopping Cart",
+                item: "Item",
+                quantity: "Quantity",
+                total: "Total",
+                subtotal: "Subtotal",
+                gst: "GST (9%)",
+                grandTotal: "Grand Total",
+                emptyCart: "Your cart is currently empty.",
+                moqNote: `Psst... add more items to reach our $${MOQ_TARGET} MOQ for special handling!`,
+                stockLimitMsg: "Stock limit reached!",
+                checkout: "Checkout Now", // <-- BARU
+                invoiceTitle: "Invoice", // <-- BARU
+                invoiceDelivery: "Delivery Date", // <-- BARU
+                invoiceNum: "Invoice #" // <-- BARU
+            },
+            id: { 
+                appTitle: "Sistem Manajemen Seafood", 
+                deliveryTitle: "🚚 Tanggal Pengiriman", 
+                priceListTitle: "💰 Daftar Harga", 
+                stockListTitle: "📦 Daftar Stok", 
+                product: "Produk", 
+                category: "Kategori", 
+                finalPrice: "Harga", 
+                stock: "Stok", 
+                frozen: "Beku", 
+                live: "Hidup", 
+                shiok: "Siap Saji",
+                order: "Pesan",
+                add: "Tambah",
+                outOfStock: "Habis",
+                cartTitle: "🛒 Keranjang Belanja",
+                item: "Item",
+                quantity: "Jumlah",
+                total: "Total",
+                subtotal: "Subtotal",
+                gst: "GST (9%)",
+                grandTotal: "Total Akhir",
+                emptyCart: "Keranjang Anda saat ini kosong.",
+                moqNote: `Psst... tambah pesanan untuk capai $${MOQ_TARGET} MOQ agar dapat penanganan spesial!`,
+                stockLimitMsg: "Stok tidak mencukupi!",
+                checkout: "Checkout Sekarang", // <-- BARU
+                invoiceTitle: "Invoice", // <-- BARU
+                invoiceDelivery: "Tanggal Pengiriman", // <-- BARU
+                invoiceNum: "No. Invoice" // <-- BARU
+            }
+        };
+        
+        let currentLang = 'id';
+        
+        function formatCurrency(number) { 
+            return new Intl.NumberFormat('en-SG', {
+                style: 'currency', 
+                currency: 'SGD',
+                minimumFractionDigits: 2
+            }).format(number); 
+        }
+        
+        function getFinalPrice(product) { 
+            return product.basePrice; 
+        }
+        
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            const cartItem = cart.find(item => item.id === id);
+
+            if (cartItem) {
+                if (cartItem.quantity < product.stock) {
+                    cartItem.quantity++;
+                } else {
+                    alert(translations[currentLang].stockLimitMsg);
+                }
+            } else {
+                if (product.stock > 0) {
+                    cart.push({ 
+                        id: product.id, 
+                        name: product.name, 
+                        price: getFinalPrice(product), 
+                        quantity: 1 
+                    });
+                }
+            }
+            renderCart();
+            renderPriceList();
+        }
+
+        function updateCartQuantity(id, change) {
+            const cartItemIndex = cart.findIndex(item => item.id === id);
+            if (cartItemIndex === -1) return;
+
+            const cartItem = cart[cartItemIndex];
+            const product = products.find(p => p.id === id);
+            
+            const newQuantity = cartItem.quantity + change;
+
+            if (newQuantity > product.stock) {
+                alert(translations[currentLang].stockLimitMsg);
+                return;
+            }
+
+            if (newQuantity <= 0) {
+                cart.splice(cartItemIndex, 1);
+            } else {
+                cartItem.quantity = newQuantity;
+            }
+            renderCart();
+            renderPriceList();
+        }
+        
+        function renderCart() {
+            const cartBody = document.getElementById('cart-body');
+            const summaryContainer = document.getElementById('cart-summary-container');
+            cartBody.innerHTML = '';
+            summaryContainer.innerHTML = '';
+
+            if (cart.length === 0) {
+                summaryContainer.innerHTML = `<p class="empty-cart-message" data-lang="emptyCart">${translations[currentLang].emptyCart}</p>`;
+                return;
+            }
+
+            let subtotal = 0;
+            cart.forEach(item => {
+                const lineTotal = item.price * item.quantity;
+                subtotal += lineTotal;
+                
+                const row = `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>
+                            <button class="qty-btn" onclick="updateCartQuantity('${item.id}', -1)">-</button>
+                            ${item.quantity}
+                            <button class="qty-btn" onclick="updateCartQuantity('${item.id}', 1)">+</button>
+                        </td>
+                        <td><strong>${formatCurrency(lineTotal)}</strong></td>
+                    </tr>
+                `;
+                cartBody.innerHTML += row;
+            });
+
+            const gst = subtotal * GST_RATE;
+            const total = subtotal + gst;
+
+            const summaryHTML = `
+                <div class="cart-summary">
+                    <p><span data-lang="subtotal">${translations[currentLang].subtotal}</span> <span>${formatCurrency(subtotal)}</span></p>
+                    <p><span data-lang="gst">${translations[currentLang].gst}</span> <span>${formatCurrency(gst)}</span></p>
+                    <h3><span data-lang="grandTotal">${translations[currentLang].grandTotal}</span> <span>${formatCurrency(total)}</span></h3>
+                    
+                    <small class="moq-note" data-lang="moqNote">
+                        ${translations[currentLang].moqNote}
+                    </small>
+                    
+                    <button classt="btn checkout-btn" onclick="checkout()" data-lang="checkout">
+                        ${translations[currentLang].checkout}
+                    </button>
+                </div>
+            `;
+            summaryContainer.innerHTML = summaryHTML;
+        }
+
+        function renderTables() { 
+            renderPriceList(); 
+            renderStockList();
+            renderCart();
+        }
+        
+        function renderPriceList() { 
+            const tbody = document.getElementById('price-list-body'); 
+            tbody.innerHTML = ''; 
+            products.forEach(product => { 
+                const finalPrice = getFinalPrice(product);
+                const categoryText = translations[currentLang][product.category.toLowerCase()] || product.category;
+                const categoryClass = `category-${product.category.toLowerCase()}`; 
+                
+                const cartItem = cart.find(item => item.id === product.id);
+                const cartQuantity = cartItem ? cartItem.quantity : 0;
+                const isOutOfStock = product.stock <= cartQuantity;
+                const buttonText = (product.stock === 0) ? translations[currentLang].outOfStock : translations[currentLang].add;
+                
+                const row = `
+                    <tr>
+                        <td>${product.name}</td>
+                        <td><span class="${categoryClass}">${categoryText}</span></td>
+                        <td><strong>${formatCurrency(finalPrice)}</strong></td>
+                        <td>${product.stock}</td>
+                        <td>
+                            <button class="btn add-btn" onclick="addToCart('${product.id}')" ${isOutOfStock ? 'disabled' : ''}>
+                                ${buttonText}
+                            </button>
+                        </td>
+                    </tr>`; 
+                tbody.innerHTML += row; 
+            }); 
+        }
+        
+        function renderStockList() { 
+            const tbody = document.getElementById('stock-list-body'); 
+            tbody.innerHTML = ''; 
+            products.forEach(product => { 
+                const row = `
+                    <tr>
+                        <td>${product.name}</td>
+                        <td>${product.stock}</td>
+                    </tr>`; 
+                tbody.innerHTML += row; 
+            }); 
+        }
+        
+        function setLanguage(lang) { 
+            currentLang = lang; 
+            document.querySelectorAll('[data-lang]').forEach(element => { 
+                const key = element.getAttribute('data-lang'); 
+                if (translations[lang][key]) { 
+                    element.textContent = translations[lang][key]; 
+                } 
+            }); 
+            document.getElementById('lang-id').classList.toggle('active', lang === 'id'); 
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en'); 
+            renderTables(); 
+        }
+        
+        // --- FUNGSI BARU: CHECKOUT & INVOICE ---
+        
+        function clearCart() {
+            // "Owner" harus mengupdate stok secara manual di 'const products'
+            // Kode ini TIDAK mengurangi stok secara otomatis
+            cart = [];
+            renderTables();
+        }
+
+        function checkout() {
+            // 1. Kumpulkan semua data
+            let subtotal = 0;
+            cart.forEach(item => { subtotal += item.price * item.quantity; });
+            const gst = subtotal * GST_RATE;
+            const total = subtotal + gst;
+            const deliveryDate = document.getElementById('delivery-date-picker').value;
+            const invoiceNumber = `INV-${Date.now().toString().slice(-6)}`;
+            
+            // 2. Buat HTML untuk item di invoice
+            let itemsHTML = '';
+            cart.forEach(item => {
+                itemsHTML += `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>${item.quantity}</td>
+                        <td>${formatCurrency(item.price)}</td>
+                        <td>${formatCurrency(item.price * item.quantity)}</td>
+                    </tr>
+                `;
+            });
+            
+            // 3. Buat template HTML lengkap untuk invoice
+            const invoiceHTML = `
+                <html>
+                <head>
+                    <title>${translations[currentLang].invoiceTitle} ${invoiceNumber}</title>
+                    <style>
+                        body { font-family: 'Poppins', sans-serif; margin: 0; padding: 40px; }
+                        .container { max-width: 800px; margin: auto; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0,0,0,0.1); padding: 40px; }
+                        h1 { color: #2c3e50; }
+                        .header { display: flex; justify-content: space-between; margin-bottom: 40px; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+                        th, td { border-bottom: 1px solid #ddd; padding: 12px; text-align: left; }
+                        thead th { background-color: #3498db; color: white; }
+                        .total-summary { float: right; width: 40%; }
+                        .total-summary p { display: flex; justify-content: space-between; margin: 8px 0; }
+                        .total-summary h3 { display: flex; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 2px solid #333; }
+                        .print-btn { display: block; width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; border-radius: 5px; font-size: 1.1rem; cursor: pointer; text-align: center; margin-top: 30px; }
+                        
+                        @media print {
+                            body { padding: 0; }
+                            .print-btn { display: none; }
+                            .container { border: none; box-shadow: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <div>
+                                <h1>${translations[currentLang].invoiceTitle}</h1>
+                                <strong>${translations[currentLang].invoiceNum}:</strong> ${invoiceNumber}<br>
+                                <strong>${translations[currentLang].invoiceDelivery}:</strong> ${deliveryDate}
+                            </div>
+                        </div>
+                        
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>${translations[currentLang].item}</th>
+                                    <th>${translations[currentLang].quantity}</th>
+                                    <th>${translations[currentLang].finalPrice}</th>
+                                    <th>${translations[currentLang].total}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${itemsHTML}
+                            </tbody>
+                        </table>
+                        
+                        <div class="total-summary">
+                            <p><span>${translations[currentLang].subtotal}:</span> <span>${formatCurrency(subtotal)}</span></p>
+                            <p><span>${translations[currentLang].gst}:</span> <span>${formatCurrency(gst)}</span></p>
+                            <h3><span>${translations[currentLang].grandTotal}:</span> <span>${formatCurrency(total)}</span></h3>
+                        </div>
+                        
+                        <button class="print-btn" onclick="window.print()">${currentLang === 'id' ? 'Cetak Invoice' : 'Print Invoice'}</button>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            // 4. Buka tab baru dan tulis HTML invoice
+            const newWindow = window.open();
+            newWindow.document.write(invoiceHTML);
+            newWindow.document.close();
+            
+            // 5. Kosongkan keranjang
+            clearCart();
+        }
+        
+        // --- AKHIR FUNGSI BARU ---
+        
+        document.getElementById('lang-id').addEventListener('click', () => setLanguage('id'));
+        document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
+        
+        document.addEventListener('DOMContentLoaded', () => { 
+            const datePicker = document.getElementById('delivery-date-picker');
+            const today = new Date().toISOString().split('T')[0];
+            datePicker.min = today;
+            datePicker.value = today;
+            
+            setLanguage(currentLang);
+        });
+    </script>
+</body>
+</html>
